@@ -10,7 +10,7 @@ Contents
 * utils.h is mostly old junk to work with lists, I no longer use them. But there are some things I need and use.
 * parser.h has all functions to cut string into parts, get comments, arguments, etc. You get the idea.
 * executor.h has stuff to execute commands, error alerts (not yet) and pre-defined shell commands ("exit" will stop the execution of shell).
-* zadm.h is Zed's Awesome Debug Macros. I hope you don't mind me using them, they are awesome.
+* zadm.h is Zed's Awesome Debug Macros. Copyright by Zed Shaw. You should read his "Learn C the Hard Way".
 
 shell.c has only main().
 
