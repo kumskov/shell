@@ -61,15 +61,29 @@ void cleanList(arg** list)
 
 /* Now this is more interesting... */
 
-void init()     /* Make shell ignore signals */
+void ignoreSignals()
     {
-    TERMINAL=STDIN_FILENO;
-    processCounter=0;
     signal(SIGQUIT, SIG_IGN);
     signal(SIGTTOU, SIG_IGN);
     signal(SIGTTIN, SIG_IGN);
     signal(SIGTSTP, SIG_IGN);
     signal(SIGINT, SIG_IGN);
+    }
+
+void restoreSignals()
+    {
+    signal(SIGINT, SIG_DFL);
+    signal(SIGQUIT, SIG_DFL);
+    signal(SIGTSTP, SIG_DFL);
+    signal(SIGTTIN, SIG_DFL);
+    }
+
+
+void init()
+    {
+    TERMINAL=STDIN_FILENO;
+    processCounter=0;
+    ignoreSignals();
     }
 
 int checkProcessLimit()     /* Check if we have too many processes running */
