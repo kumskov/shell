@@ -8,14 +8,6 @@ char* getString() /* Read infinite string from the input, say something if we go
     int a=0, n=1;
     char* input;
     input=(char*) malloc(sizeof(char));
-    /*
-    tempinp=(char*) malloc(sizeof(char));
-    
-        if (tempinp==NULL)
-            {
-            free(input);
-            } else input=tempinp;
-    */
 
 
     input[a]=getchar();
@@ -30,21 +22,11 @@ char* getString() /* Read infinite string from the input, say something if we go
                     /* I will probably need some error flag in here. */
             break;  /* Yeah, that's right. You exceed MEMORY LENGHT - everything BREAKs. */
             }
-        /*  
-        tempinp=(char*) realloc(input, n*sizeof(char));
-        if (tempinp==NULL) 
-            {
-            free(input);
-            break;
-            } else input=tempinp;
-        */
         a++;
         input[a]=getchar();
 
         }   
     input[a]='\0';
-    
-    /* printf("The input is %s\n",input); */ /* Just some debugging junk */
     
     return input;
     }
