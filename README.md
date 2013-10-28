@@ -22,11 +22,11 @@ What currently works
 
 Updates
 ===
-* 27.10.2013: 
-* *Initial upload
-* 28.10.2013: 
-* *Fixed memory leaks. 
-* *Found a couple of 
+27.10.2013: 
+* Initial upload
+ 28.10.2013: 
+* Fixed memory leaks. 
+* Found a couple of problems with command execution and signal handling. Will work on that later.
 
 Copyright
 ===
