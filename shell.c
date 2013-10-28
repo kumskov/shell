@@ -10,16 +10,17 @@
 int main()
     {
     int f=0;
+    int arglength;
     init();
 
     while(TRUE)
         {
-        homeSweetHome=getenv("HOME");
         printf("------------- starting new command -------------\n");
         printf(">");
-        source=getUserInput();
+        source=getString();
         debug("Input is >%s<", source);
         argflag=getExecName(source, execName, arguementString);
+        arglength=3;
         if (argflag)
             {
             debug("Getting arguements...");
@@ -29,11 +30,12 @@ int main()
             }   
 
         defflag=checkDefaultCommands();
-
-        if (!defflag) 
+        if (!defflag)
             ironsInTheFire(execName, arguements, FG);
+
          /*Uncomment this to proceed to Shell Part 2 task */
         cleanUp(arguements, arglength);
+        source[0]='\0';
         }    
     
 
