@@ -20,6 +20,14 @@ What currently works
 * Launching new processes in background/foreground
 * Properly cutting arguments of launched commands (hash stands for comment and is ignored, backslash screens symbols, quotes contain single argument inside.
 
+Updates
+===
+* 27.10.2013: 
+* *Initial upload
+* 28.10.2013: 
+* *Fixed memory leaks. 
+* *Found a couple of 
+
 Copyright
 ===
 This program was written my Mikhail Kumskov from 217 MSU group in 2013. This code and all parts of it are distributed under GPL of current redaction.
