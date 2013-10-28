@@ -36,30 +36,31 @@ typedef struct proc /* 2-way list for keeping our arguements */
     int currentState;	/* This way I will be able to move it to foreground or background */
     } process;
 
-process processTable[MAX_PROCESS_AMOUNT];
-int processCounter;
+static process processTable[MAX_PROCESS_AMOUNT];
+static int processCounter;
 
 #define FG 1 		/* Foreground */
 #define BG 2 		/* Background */
 
-char source[MAX_ARR_SIZE];
-char execName[MAX_ARR_SIZE];
-char arguementString[MAX_ARR_SIZE];
-char homeSweetHome[MAX_ARR_SIZE];
-char* arguements[MAX_ARR_SIZE];
-char* defaultCommands[] = {"exit", "home", "help", "copyright", "cd"};
-char* commandHelp[] = {"Stops shell execution", "Shows home directory", "Display help", "Display copyrights", "Change directory"};
-const int commandAmount = 5;
-int argflag;
-int arglenght;
-int defflag;
+static char* source;
+static char execName[MAX_ARR_SIZE];
+static char arguementString[MAX_ARR_SIZE];
+static char homeSweetHome[MAX_ARR_SIZE];
+static char* arguements[MAX_ARR_SIZE];
+static char* defaultCommands[] = {"exit", "home", "help", "copyright", "cd"};
+static char* commandHelp[] = {"Stops shell execution", "Shows home directory", "Display help", "Display copyrights", "Change directory"};
+static const int commandAmount = 5;
+static int argflag;
+static int arglenght;
+static int defflag;
+static int errflag;
 
 int TERMINAL;	/* Input-output control */
 int SHELL_ID;	/* Shell pid to return terminal control	*/
 
 /* Main input procedure */
 
-char* getString(int eoflag); /* Read infinite string from the input, say something if we go over MEM_LENGTH. */
+char* getString(); /* Read infinite string from the input, say something if we go over MEM_LENGTH. */
 
 
 
@@ -76,7 +77,11 @@ void cleanList(arg** list); /*Pretty self-explanatory, huh? */
 
 void cleanUp(char** trash, int num); /*Tried to clean string array properly. Failed horribly. */
 
+void ignoreSignals();
 
+void restoreSignals();
+
+void init();
 
 /* Procedures to work with program name and comments in the line */
 
@@ -94,7 +99,32 @@ void printArguements(arg** inputList); /* This is a placeholder since we don't d
 
 /* Executing commands and stuff. Some error notification maybe? */
 
-void ironsInTheFire(char* command, char** args);  /* Properly working executing. Well, it works. And executes stuff. */
+void ironsInTheFire(char* command, char** args, int mode);  /* Properly working executing. Well, it works. And executes stuff. */
 
+void sendToBackground(pid_t id);
+
+void sendToForeground(pid_t id);
+
+void waitProcess(pid_t id);
+
+void killProcess(pid_t id);
+
+void createNewProcess(char* name, pid_t id, int state);
+
+int getProcessByID(pid_t id);
+
+void deleteProcess(pid_t id);
+
+void childControl();
+
+void helpMe();
+
+void findMe();
+
+void killMe();
+
+void changeDir();
+
+int checkDefaultCommands();
 
 #endif
