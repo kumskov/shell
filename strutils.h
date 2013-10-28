@@ -3,7 +3,7 @@
 
 /* Reading user input */
 
-char* getString(int eoflag) /* Read infinite string from the input, say something if we go over MEM_LENGTH. */
+char* getString() /* Read infinite string from the input, say something if we go over MEM_LENGTH. */
     { 
     int a=0, n=1;
     char* input;
@@ -40,13 +40,8 @@ char* getString(int eoflag) /* Read infinite string from the input, say somethin
         */
         a++;
         input[a]=getchar();
-        if  (input[a]==EOF) 
-            {
-            eoflag=1;
-            break;
-            }
-        else eoflag=0;
-        }
+
+        }   
     input[a]='\0';
     
     /* printf("The input is %s\n",input); */ /* Just some debugging junk */
@@ -58,7 +53,7 @@ char* getString(int eoflag) /* Read infinite string from the input, say somethin
 
 /* Properly reading user input */
 
-char* getUserInput();
+void getUserInput(char* output)
     {
     char userInput[MAX_STRING_LENGTH];
     char input;
@@ -81,7 +76,7 @@ char* getUserInput();
                 }
         }
     userInput[n]='\0';
-    return userInput;
+    output=userInput;
     }
 
 /* Oh my god why the hell would I want to create a GOD FORSAKEN FUNCTION FOR SIMPLE a=b where both a and b are char*??? */
