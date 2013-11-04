@@ -19,6 +19,7 @@ int main()
         printf(">");
         source=getString();
         debug("Input is >%s<", source);
+        getHashComment(source, commentless);
         argflag=getExecName(source, execName, arguementString);
         arglength=3;
         if (argflag)
