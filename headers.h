@@ -43,6 +43,7 @@ static int processCounter;
 #define BG 2 		/* Background */
 
 static char* source;
+static char* commentless;
 static char execName[MAX_ARR_SIZE];
 static char arguementString[MAX_ARR_SIZE];
 static char homeSweetHome[MAX_ARR_SIZE];
