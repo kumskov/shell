@@ -7,8 +7,7 @@ char* getString() /* Read infinite string from the input, say something if we go
     { 
     int a=0, n=1;
     char* input;
-    input=(char*) malloc(sizeof(char));
-
+    input=(char*) malloc(STRING_INIT_LENGTH*sizeof(char));
 
     input[a]=getchar();
     
@@ -24,8 +23,12 @@ char* getString() /* Read infinite string from the input, say something if we go
             }
         a++;
         input[a]=getchar();
-
-        }   
+        }
+    if (input[a]==EOF) 
+    {
+        printf("\nTerminating...\n");
+        exit(0);
+    }
     input[a]='\0';
     
     return input;
@@ -81,12 +84,13 @@ void putTextToString(char* string, const char* text)
 
 /* Clearing the array of strings. */
 
-void cleanUp(char** array, int num)
+void cleanUp(char** array)
     {
-    while (num!=0) 
+    int i;
+    for (i=0; i<128; i++)
+
         {
-        array[num] = NULL;                             
-        num--;                                                                     
+        array[i] = NULL;                                                                                                 
         }
     }
 
