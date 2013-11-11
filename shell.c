@@ -9,34 +9,42 @@
 
 int main()
     {
-    int f=0;
     int arglength;
+    int i;
     init();
 
-    while(TRUE)
+    while ((TRUE) && (!endflag))
         {
+        arglength=0;
         printf("------------- starting new command -------------\n");
+        debug("Source is >%s<, execName is >%s<, arguementstring is >%s<", source, execName, arguementString);
         printf(">");
-        source=getString();
+        getString(source);
         debug("Input is >%s<", source);
-        getHashComment(source, commentless);
         argflag=getExecName(source, execName, arguementString);
+        printf("Program name is >%s<\n", execName);
+        free(source);
+        
         arglength=3;
         if (argflag)
             {
             debug("Getting arguements...");
             debug("I have a string of >>%s<<", arguementString);
-            getArguements(arguementString, arguements, &arglenght);
+            splitArrayFromString(arguementString, arguements, &arglenght);
             debug("Global counter of array elements is %d", arglenght);
             }   
-
-        defflag=checkDefaultCommands();
-        if (!defflag)
-            ironsInTheFire(execName, arguements, FG);
+        if (errflag)
+        {
+            log_err("An error occured - command ignored");
+        } 
+        else defflag=checkDefaultCommands();
+        /* if (!defflag)
+            ironsInTheFire(execName, arguements, FG); */
 
          /*Uncomment this to proceed to Shell Part 2 task */
-        cleanUp(arguements, arglength);
-        source[0]='\0';
+        cleanUp(arguements);
+        execName[0]='\0';
+        arguementString[0]='\0';
         }    
     
 
