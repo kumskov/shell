@@ -6,7 +6,7 @@
 void ironsInTheFire(char* command, char** args, int mode)   /* Properly working executing. Well, it works. And executes stuff. */
     {
     pid_t pid, terminalReciever;
-    int junk;
+    
     
     pid=fork();
     if (pid)    
@@ -26,7 +26,7 @@ void ironsInTheFire(char* command, char** args, int mode)   /* Properly working 
 
         } else 
             {
-            junk=setpgrp();   
+            /* setpgrp();   */
             terminalReciever=getpid();
 
             if (mode==FG) tcsetpgrp(TERMINAL, terminalReciever);    /* Allow child to use terminal */
@@ -68,10 +68,9 @@ void sendToForeground(pid_t id) /* This process will be in the foreground and wi
 
 void waitProcess(pid_t id)  /* Terminate the process via waitpid */
     {
-    int waiter;
     int status;
     debug("Killing zombie process with id %d with wait", id);
-    waiter=waitpid(id, &status, WNOHANG);
+    waitpid(id, &status, WNOHANG);
     deleteProcess(id);
     debug("Zombie process %d succesfully killed", id);
     }
@@ -113,6 +112,7 @@ int getProcessByID(pid_t id)   /* Find process with id and return it's number in
         printf("No process was found with id %d\n", id);
         return -1;
         }
+    return 0;
     }
 
 void deleteProcess(pid_t id)   /* Delete process from execution list */
@@ -139,10 +139,11 @@ void deleteProcess(pid_t id)   /* Delete process from execution list */
 void childControl()  /* To be finished  */
     {
     pid_t pid;
-    int checker;    /* For WIFEXITED, SIGNALED and STOPPED */
-    int status;     /* This one is weird since I don't completely understand how it works. But WIFEXITED and others use this &int for child detected by waitpid, so here it is. */
-
-    pid=waitpid(WAIT_ANY, &status, WNOHANG|WUNTRACED );
+    /*int checker;*/    /* For WIFEXITED, SIGNALED and STOPPED */
+    /* int status; */     /* This one is weird since I don't completely understand how it works. But WIFEXITED and others use this &int for child detected by waitpid, so here it is. */
+    
+    /* pid=waitpid(WAIT_ANY, &status, WNOHANG|WUNTRACED ); */
+    pid=1;
     if (pid) 
         {                                                                         
         
@@ -193,7 +194,7 @@ void changeDir()    /* Change directory */
 
 int checkDefaultCommands()  /* Check for pre-defined command usage. Not yet complete */
     {
-    int chk, f=0, i, j;
+    int chk, f=0, i;
     for (i=0;i<commandAmount;i++)
         {
         chk=strcmp(execName, defaultCommands[i]);
