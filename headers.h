@@ -1,6 +1,7 @@
 #ifndef __headers_h__ 
 #define __headers_h__
 
+#define _POSIX_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -14,6 +15,7 @@
 #define FALSE 0		/* Why didn't I define this earlier? */
 
 #define MAX_ARR_SIZE 128
+#define MAX_ARG_LENGTH 100
 #define MAX_STRING_LENGTH 100
 #define MEM_LENGHT 1<<16 		/* What I assume is our memory length is. Everything over it will give you an error, nothing will be executed */
 #define STRING_INIT_LENGTH 100
@@ -43,18 +45,19 @@ static int processCounter;
 #define BG 2 		/* Background */
 
 static char* source;
-static char* commentless;
 static char execName[MAX_ARR_SIZE];
 static char arguementString[MAX_ARR_SIZE];
-static char homeSweetHome[MAX_ARR_SIZE];
+/* static char homeSweetHome[MAX_ARR_SIZE]; */
 static char* arguements[MAX_ARR_SIZE];
-static char* defaultCommands[] = {"exit", "home", "help", "copyright", "cd"};
-static char* commandHelp[] = {"Stops shell execution", "Shows home directory", "Display help", "Display copyrights", "Change directory"};
+static char* defaultCommands[] = {"exit", "pwd", "help", "copyright", "cd"};
+static char* commandHelp[] = {"Stops shell execution", "Shows current directory", "Display help", "Display copyrights", "Change directory"};
 static const int commandAmount = 5;
 static int argflag;
 static int arglenght;
 static int defflag;
 static int errflag;
+static int endflag=0;
+
 
 int TERMINAL;	/* Input-output control */
 int SHELL_ID;	/* Shell pid to return terminal control	*/
@@ -76,7 +79,7 @@ void putTextToString(char* string, const char* text); /* Why the hell did I ever
 
 void cleanList(arg** list); /*Pretty self-explanatory, huh? */
 
-void cleanUp(char** trash, int num); /*Tried to clean string array properly. Failed horribly. */
+void cleanUp(char** trash); /*Tried to clean string array properly. Failed horribly. */
 
 void ignoreSignals();
 
@@ -93,6 +96,8 @@ int getExecName(char* input, char* name, char* args); /* Will get the name of th
 void getHashComment(const char* input, char* output); /* Get comments indicated by # and ignore them */
 
 void getArguements(char* input, char* arr[], int *length); /* Alright, now THIS is the most horrible stupid dumb function I HATE so god damn much. Mostly because I can't, for some reason, properly fill char**. The first element is fine, all others will get filled with some junk which appeared out of nowhere. Please don't ask me why I am writing elements to array in THIS horrible way. I couldn't find better. Mallocing new elements doesn't work properly, I tried. */
+
+void splitArrayFromString(char* input, char** output, int *length); /* Another arguement gettimg procedure */
 
 void printArguements(arg** inputList); /* This is a placeholder since we don't do anything with arguements yet */
 
