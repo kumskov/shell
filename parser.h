@@ -12,12 +12,19 @@ int backSlashCheck(char letter, int *counter)   /* Such a sweet construction I d
 
 int getExecName(char* input, char* name, char* args) /* Will get the name of the program to execute */
     {
-    int j=0, i=0; /* j is global, i is local */
+    int j=0, i=0, bs=0; /* j is global, i is local */
     
     while((input[j]!=' ') && (input[j]!='\0'))
         {
-        name[j]=input[j];
-        j++;
+        if (input[j]=='\\') 
+        {
+            j++;
+        }
+        else
+        {
+            name[j]=input[j];
+            j++;
+        }
         }
 
 
@@ -63,12 +70,13 @@ void getHashComment(const char* input, char* output) /* Get comments indicated b
 void getArguements(char* input, char** arr, int *length)   /* Get arguements from string and fill the array with them. */
     {
     int i=0, j, n=1, bs=0, fq=0, cnt=0;
+    char* temp;
 
     while (input[i]!='\0')
         {
-        arr[cnt]=(char*) malloc(MAX_STRING_LENGTH*sizeof(char));
+        temp=(char*) malloc(MAX_ARG_LENGTH*sizeof(char));
         j=0;                                    
-        if (errno)
+        if (temp==NULL)
             {
             log_err("Could not allocate memory for argument array, exiting...");
             exit(-1);
@@ -92,7 +100,7 @@ void getArguements(char* input, char** arr, int *length)   /* Get arguements fro
                     if (input[i]=='\0')
                         {
                         log_err("One of the arguements could not be finished since the quotation wasn't closed");
-                        debug("What was written: %s", arr[cnt]);
+                        debug("What was written: %s", temp);
                         exit(-1);
                         break;
                         }
@@ -101,7 +109,7 @@ void getArguements(char* input, char** arr, int *length)   /* Get arguements fro
                         log_err("1 of the arguments is exceeding allowed argument amount");
                         log_err("Terminatiing...");
                         exit(-1);
-                        } else arr[cnt][j]=input[i];
+                        } else temp[j]=input[i];
                     i++;
                     j++;
                     n++; 
@@ -117,21 +125,23 @@ void getArguements(char* input, char** arr, int *length)   /* Get arguements fro
                     log_err("1 of the arguments is exceeding allowed argument amount");
                     log_err("Terminatiing...");
                     exit(-1);
-                    } else arr[cnt][j]=input[i];
+                    } else temp[j]=input[i];
             i++;
             j++;
             n++;
                 
             }
 
-        if ((arr[cnt][j-1]=='"') && (!fq))
+        if ((temp[j-1]=='"') && (!fq))
             {
-            arr[cnt][j-1]='\0';
-            } else arr[cnt][j]='\0';
+            temp[j-1]='\0';
+            } else temp[j]='\0';
                 
         i++;
-        debug("Arguement %d is (%s)", cnt, arr[cnt]);
+        debug("Arguement %d is (%s)", cnt, temp);
+        arr[cnt]=temp;
         debug("Written in arg array: %s", arr[cnt]);
+        free(temp);
         cnt++;
         /* pushToList(outputList, singleArguement); */
           /* And then I clean it for a new arguement */
@@ -142,6 +152,134 @@ void getArguements(char* input, char** arr, int *length)   /* Get arguements fro
     arr[cnt]=NULL;
     debug("Finished filling arrguements array");
 
+    }
+
+void splitArrayFromString(char* input, char** output, int *length)
+    {
+        int fhash=0, fslash=0, fquote=0, fend=0;
+        int charcnt=0, arrcharcnt=0, arrcnt=0;
+        char word[STRING_INIT_LENGTH];
+
+        while (!fend)
+        {
+            switch(input[charcnt])
+            {
+                case '\\':
+                {
+                    if (fslash)
+                    {
+                        word[arrcharcnt]=input[charcnt];
+                        arrcharcnt++;
+                        charcnt++;
+                        fslash=0;
+                    }
+                    else
+                    {
+                        fslash=1;
+                        charcnt++;
+                    }
+                    break;
+                }
+
+                case '\"':
+                {
+                    if (fslash)
+                    {
+                        word[arrcharcnt]=input[charcnt];
+                        arrcharcnt++;
+                        charcnt++;
+                        fslash=0;
+
+                    } 
+                    else 
+                    {
+                        if (fquote)
+                        {
+                            fquote=0;
+                            charcnt++;
+                        }
+                        else
+                        {
+                            fquote=1;
+                            charcnt++;
+                        }
+                    }
+                    break;
+                }
+
+                case '#':
+                {
+                    if ((fslash) || (fquote))
+                    {
+                        word[arrcharcnt]=input[charcnt];
+                        arrcharcnt++;
+                        charcnt++;
+                        if (fslash) fslash=0;
+                    }
+                    else
+                    {
+                    fend=1;
+                    }
+                    break;
+                }
+
+                case EOF:
+                {
+                    endflag=1;
+                    fend=1;
+                    break;
+                }
+
+                case '\0':
+                {
+                    debug("I am writing last arguement which is number %d", arrcnt);
+                    word[arrcharcnt]='\0';
+                    debug("Writing >%s<", word);
+                    arrcharcnt=0;
+                    output[arrcnt]=word;
+                    printf("Written >%s< in array of args\n", output[arrcnt]);
+                    arrcnt++;
+                    fend=1;
+                    break;
+                }
+
+                case ' ':
+                {
+                    if (fquote)
+                    {
+                        word[arrcharcnt]=input[charcnt];
+                        arrcharcnt++;
+                        charcnt++;
+                    }
+                    else
+                    {
+                        charcnt++;
+                        debug("I have arguement number %d", arrcnt);
+                        word[arrcharcnt]='\0';
+                        debug("Writing >%s<", word);
+                        arrcharcnt=0;
+                        output[arrcnt]=word;
+                        printf("Written >%s< in array of args\n", output[arrcnt]);
+                        arrcnt++;
+                    }
+                    break;
+                }
+
+                default:
+                {
+                    word[arrcharcnt]=input[charcnt];
+                    arrcharcnt++;
+                    charcnt++;
+                    break;
+                }
+            }
+        }
+        if (fquote)
+        {
+            errflag=1;
+            log_err("The quote was not closed - will not execute the command");
+        }
+        *length=arrcnt;
     }
 
 void printArguements(arg** inputList) /* This is a placeholder since we don't do anything with arguements yet */
