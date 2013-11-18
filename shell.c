@@ -9,17 +9,19 @@
 
 int main()
     {
+    char* home=getenv("HOME");
     int arglength;
-    int i;
     init();
 
+    arglength=0;
     while ((TRUE) && (!endflag))
         {
+        home=getenv("HOME");
         arglength=0;
         printf("------------- starting new command -------------\n");
         debug("Source is >%s<, execName is >%s<, arguementstring is >%s<", source, execName, arguementString);
-        printf(">");
-        getString(source);
+        printf("%s>", home);
+        source=getString();
         debug("Input is >%s<", source);
         argflag=getExecName(source, execName, arguementString);
         printf("Program name is >%s<\n", execName);
@@ -33,11 +35,12 @@ int main()
             splitArrayFromString(arguementString, arguements, &arglenght);
             debug("Global counter of array elements is %d", arglenght);
             }   
-        if (errflag)
+        testarray();
+        /* if (errflag)
         {
             log_err("An error occured - command ignored");
-        } 
-        else defflag=checkDefaultCommands();
+        } */
+        defflag=checkDefaultCommands();
         /* if (!defflag)
             ironsInTheFire(execName, arguements, FG); */
 
