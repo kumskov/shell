@@ -12,7 +12,7 @@ int backSlashCheck(char letter, int *counter)   /* Such a sweet construction I d
 
 int getExecName(char* input, char* name, char* args) /* Will get the name of the program to execute */
     {
-    int j=0, i=0, bs=0; /* j is global, i is local */
+    int j=0, i=0; /* j is global, i is local */
     
     while((input[j]!=' ') && (input[j]!='\0'))
         {
@@ -156,7 +156,7 @@ void getArguements(char* input, char** arr, int *length)   /* Get arguements fro
 
 void splitArrayFromString(char* input, char** output, int *length)
     {
-        int fhash=0, fslash=0, fquote=0, fend=0;
+        int fslash=0, fquote=0, fend=0;
         int charcnt=0, arrcharcnt=0, arrcnt=0;
         char word[STRING_INIT_LENGTH];
 
