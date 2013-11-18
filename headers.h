@@ -49,8 +49,8 @@ static char execName[MAX_ARR_SIZE];
 static char arguementString[MAX_ARR_SIZE];
 /* static char homeSweetHome[MAX_ARR_SIZE]; */
 static char* arguements[MAX_ARR_SIZE];
-static char* defaultCommands[] = {"exit", "pwd", "help", "copyright", "cd"};
-static char* commandHelp[] = {"Stops shell execution", "Shows current directory", "Display help", "Display copyrights", "Change directory"};
+static char* defaultCommands[] = {"exit", "pwd", "help", "---", "cd"};
+static char* commandHelp[] = {"Stops shell execution", "Shows current directory", "Display help", "--", "Change directory"};
 static const int commandAmount = 5;
 static int argflag;
 static int arglenght;
