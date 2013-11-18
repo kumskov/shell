@@ -27,12 +27,21 @@ char* getString() /* Read infinite string from the input, say something if we go
     if (input[a]==EOF) 
     {
         printf("\nTerminating...\n");
+        free(input);
         exit(0);
     }
     input[a]='\0';
     
     return input;
     }
+
+char* strmerge(char* str1, char* str2)
+{
+    char* result=malloc((strlen(str1)+strlen(str2))*sizeof(char));
+    strcpy(result, str1);
+    strcat(result, str2);
+    return result;
+}
 
 /* Alright, getString is awfull dumb useless function that is not optimized in any way. Why the hell would I ever want dynamic string? Screw it, I am doing it like perfectly sane people do */
 
@@ -93,6 +102,18 @@ void cleanUp(char** array)
         array[i] = NULL;                                                                                                 
         }
     }
+
+void testarray()
+{
+    int i;
+    for (i=0;i<5;i++)
+    {
+        debug("test %s", arguements[i]);
+    }
+    debug("test1 %s", arguements[0]);
+    debug("test1 %s", arguements[1]);
+    debug("test1 %s", arguements[2]);
+}
 
 
 #endif
