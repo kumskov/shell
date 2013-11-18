@@ -184,11 +184,22 @@ void killMe()   /* Terminate shell execution */
 void changeDir()    /* Change directory */
     {
     int success;
+    char* dir;
     if (arguements[0]==NULL) chdir(getenv("HOME"));
         else 
             {
-            success=chdir(arguements[0]);
-            if (success==-1) printf("There is no directory named <%s>\n", arguements[0]);
+            if (arguements[0][0]=='/')
+            {
+                dir=strmerge(getenv("HOME"), arguements[0]); 
+            }
+            else 
+            {
+                dir=strmerge(getenv("HOME"), "/"); 
+                dir=strmerge(dir, arguements[0]); 
+            }
+            
+            success=chdir(dir);
+            if (success==-1) printf("There is no directory named <%s>\n", dir);
             }
     }
 
@@ -222,7 +233,7 @@ int checkDefaultCommands()  /* Check for pre-defined command usage. Not yet comp
                     }
                 case 3:
                     {
-                    printf("This program was created by Kumskov Mikhail, 2013\n");
+                    printf("---\n");
                     f=1;
                     break;
                     }
