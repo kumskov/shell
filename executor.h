@@ -3,158 +3,60 @@
 
 /* Main procedure to launch new process. Because newProcess() is too mainstream. */
 
-void ironsInTheFire(char* command, char** args, int mode)   /* Properly working executing. Well, it works. And executes stuff. */
+void ironsInTheFire(char *cmd[], char* file, int mode, int descriptor)   
     {
-    pid_t pid, terminalReciever;
-    
-    
-    pid=fork();
-    if (pid)    
-        {            /* Create new process with called execution mode (background or foreground) */
-        if ((!errno) || (errflag==-1))
-            {
-            debug("I created child with PID %d\n", pid);
-            setpgid(pid, pid);                                                        
-        
-            createNewProcess(command, pid, mode);
-            if (mode==FG) sendToForeground(pid);                                             
-            if (mode==BG) sendToBackground(pid);
+        pid_t pid;
+        pid=fork();
+ 
+        if (pid)
+        {
+            setpgid(pid, pid);                                                                      
+            procList=addNewProcess(pid, *(cmd), file, (int) mode); 
+            process* proc=getProcessByPID(pid);                            
+            if (executionMode == FG) sendProcessToForeground(proc);                                       
+            if (executionMode == BG) sendProcessToBackground(proc);   
+        } 
+        else
+        {
+            signal(SIGINT, SIG_DFL);
+            signal(SIGQUIT, SIG_DFL);
+            signal(SIGTSTP, SIG_DFL);
+            signal(SIGCHLD, &childHandler);
+            signal(SIGTTIN, SIG_DFL);
+            setpgrp();
+            if (mode==FG) tcsetpgrp(TERMINAL, getpid());
+            if (mode==BG) printf("Process No%d with PID <%d> was created.\n", ++processCounter, (int) getpid());
 
-            restoreSignals(); /* Parent returns proper signals */
-            
-            }
+            execute(cmd, file, mode, descriptor);
 
-        } else 
-            {
-            /* setpgrp();   */
-            terminalReciever=getpid();
-
-            if (mode==FG) tcsetpgrp(TERMINAL, terminalReciever);    /* Allow child to use terminal */
-            if (mode==BG) debug("Created a new child in background with ID of %d", terminalReciever);   /* This is totally ironic - terminalReciever DOESN'T RECIEVE ACCESS TO THE TERMINAL */
-
-            errflag=execvp(command, args);
             exit(1);
-            }
-
+        }           
     }
 
-/* Stuff to work with processes */
-
-void sendToBackground(pid_t id) /* Take terminal control from process and indicate it in the table. Also this process will not be stopped. */
+void waitForProcess(process* proc)
     {
-    int num;
-    debug("Process %d will be sent to background", id);
-    num=getProcessByID(id);
-    if (num!=-1) processTable[num].currentState=BG;
-        else killProcess(id);
-    tcsetpgrp(TERMINAL, SHELL_ID);
+        int terminate;
+        waitpid(proc->pid, &terminate, WNOHANG);
+        procList=deleteProcess(proc);                                   
     }
 
-void sendToForeground(pid_t id) /* This process will be in the foreground and will be stopped */
+void execute(char *cmd[], char *file, int mode, int descrtiptor)
     {
-    int num;
-    debug("Process %d will be sent to foreground", id);
-    num=getProcessByID(id);
-    if (num!=-1) 
+        int commandDesc;
+        if (descriptor==STDIN) 
         {
-        processTable[num].currentState=FG;
-        debug("I gave %d the terminal", id);                   
-        tcsetpgrp(TERMINAL, id);
-        } else killProcess(id);
-    waitProcess(id);
+            commandDesc=open(file, O_RDONLY, 0666);                                     
+            dup2(commandDesc, STDIN_FILENO);
+            close(commandDesc);
+        }
 
-    tcsetpgrp(TERMINAL, SHELL_ID);
-    }
-
-void waitProcess(pid_t id)  /* Terminate the process via waitpid */
-    {
-    int status;
-    debug("Killing zombie process with id %d with wait", id);
-    waitpid(id, &status, WNOHANG);
-    deleteProcess(id);
-    debug("Zombie process %d succesfully killed", id);
-    }
-
-void killProcess(pid_t id)  /* Terminate the process via SIGKILL */
-    {
-    debug("Killing process with id %d by sending him SIGKILL", id);
-    kill(id, SIGKILL);
-    deleteProcess(id);
-    debug("Process %d succesfully killed", id);
-    }
-
-void createNewProcess(char* name, pid_t id, int state) /* Add new process at the end of processTable */
-    {
-    if (checkProcessLimit())
+        if (descriptor == STDOUT) 
         {
-        processTable[processCounter].name=name;
-        processTable[processCounter].pid=id;
-        processTable[processCounter].currentState=state;
-        processCounter++;
+            commandDesc=open(file, O_CREAT|O_TRUNC|O_WRONLY, 0666);  // open (create) the file truncating it at 0, for write only
+            dup2(commandDesc, STDOUT_FILENO);
+            close(commandDesc);
         }
-    }
-
-int getProcessByID(pid_t id)   /* Find process with id and return it's number in processTable */
-    {
-    int i, flag=0;
-    for (i=0;i<processCounter;i++)
-        {   
-        if (processTable[i].pid==id)
-            {
-            debug("Found process with id %d, being %d in the process list", id, i);
-            flag=1;
-            return i;
-            break;
-            }
-        }
-    if (!flag) 
-        {
-        printf("No process was found with id %d\n", id);
-        return -1;
-        }
-    return 0;
-    }
-
-void deleteProcess(pid_t id)   /* Delete process from execution list */
-    {
-    int i, j, flag=0;
-    for (i=0;i<processCounter;i++)
-        {   
-        if (processTable[i].pid==id)
-            {
-            debug("Deleting %d process, being %d in the process list", id, i);
-            processCounter--;  
-            for (j=i;j<processCounter;j++)
-                {   
-                processTable[j].name=processTable[j+1].name;
-                processTable[j].pid=processTable[j+1].pid;
-                processTable[j].currentState=processTable[j+1].currentState;
-                flag=1;
-                }
-            }
-        }
-    if (!flag) printf("No process was suspended with id %d\n", id);
-    }
-
-void childControl()  /* To be finished  */
-    {
-    pid_t pid;
-    /*int checker;*/    /* For WIFEXITED, SIGNALED and STOPPED */
-    /* int status; */     /* This one is weird since I don't completely understand how it works. But WIFEXITED and others use this &int for child detected by waitpid, so here it is. */
-    
-    /* pid=waitpid(WAIT_ANY, &status, WNOHANG|WUNTRACED ); */
-    pid=1;
-    if (pid) 
-        {                                                                         
-        
-        /*
-        
-        Some code should be here, with a lot of majyyks including WIFEXITED, WIFSIGNALED and WIFSTOPPED. This should be run when process gets SIGCHL.
-
-        */
-
-        tcsetpgrp(TERMINAL, SHELL_ID);
-        }
+        if (execvp(*cmd, cmd)==-1) log_err("Could not execute <%s>", *cmd);
     }
 
 /* Pre-defined commands */
@@ -164,7 +66,7 @@ void helpMe()   /* Print help */
     int j;
     for (j=0;j<commandAmount;j++)
         {
-        printf("%s: %s\n", defaultCommands[j], commandHelp[j]);
+        printf("<%s>: %s\n", defaultCommands[j], commandHelp[j]);
         }
     }
 
@@ -183,32 +85,22 @@ void killMe()   /* Terminate shell execution */
 
 void changeDir()    /* Change directory */
     {
-    int success;
-    char* dir;
-    if (arguements[0]==NULL) chdir(getenv("HOME"));
+        if (arguements[1] == NULL) 
+        {
+            chdir(getenv("HOME"));                                                 
+        } 
         else 
-            {
-            if (arguements[0][0]=='/')
-            {
-                dir=strmerge(getenv("HOME"), arguements[0]); 
-            }
-            else 
-            {
-                dir=strmerge(getenv("HOME"), "/"); 
-                dir=strmerge(dir, arguements[0]); 
-            }
-            
-            success=chdir(dir);
-            if (success==-1) printf("There is no directory named <%s>\n", dir);
-            }
+        {
+            if (chdir(commandArgv[1])==-1) printf(" %s: Dir doesnt exits\n", arguements[1]);
+        }
     }
 
-int checkDefaultCommands()  /* Check for pre-defined command usage. Not yet complete */
+int checkDefaultCommands()  /* Check for pre-defined command usage. Almost done */
     {
     int chk, f=0, i;
     for (i=0;i<commandAmount;i++)
         {
-        chk=strcmp(execName, defaultCommands[i]);
+        chk=strcmp(arguements[0], defaultCommands[i]);
         if (!chk) 
             {
             switch(i)
@@ -243,6 +135,30 @@ int checkDefaultCommands()  /* Check for pre-defined command usage. Not yet comp
                     f=1;
                     break;
                     }
+                case 5:
+                    {
+                    printf("Work in progress. Sorry, mate.\n")
+                    f=1;
+                    break;
+                    }
+                case 6:
+                    {
+                    ironsInTheFire(arguements+2, *(arguements+1), FG, STDIN);
+                    f=1;
+                    break;
+                    }
+                case 7:
+                    {
+                    ironsInTheFire(arguements+2, *(arguements+1), FG, STDOUT);
+                    f=1;
+                    break;
+                    }   
+                case 8:
+                    {
+                    printf("Work in progress. Sorry, mate.\n")
+                    f=1;
+                    break;
+                    }   
                 default:
                     {
                     break;
@@ -254,7 +170,11 @@ int checkDefaultCommands()  /* Check for pre-defined command usage. Not yet comp
 
     return f;
 
+    }
 
+void startWorking()         /* Yup. The creation of a procedure for 1 line of code was totally nessesary */
+    {
+        if(!checkDefaultCommands) ironsInTheFire(arguements, "standart_output", FG, 0)
     }
 
 #endif

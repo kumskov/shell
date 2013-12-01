@@ -154,21 +154,21 @@ void getArguements(char* input, char** arr, int *length)   /* Get arguements fro
 
     }
 
-void splitArrayFromString(char* input, char** output, int *length)
+void splitString()
     {
         int fslash=0, fquote=0, fend=0;
-        int charcnt=0, arrcharcnt=0, arrcnt=0;
+        int charcnt=0, arrcharcnt=0;
         char word[STRING_INIT_LENGTH];
 
         while (!fend)
         {
-            switch(input[charcnt])
+            switch(source[charcnt])
             {
                 case '\\':
                 {
                     if (fslash)
                     {
-                        word[arrcharcnt]=input[charcnt];
+                        word[arrcharcnt]=source[charcnt];
                         arrcharcnt++;
                         charcnt++;
                         fslash=0;
@@ -185,7 +185,7 @@ void splitArrayFromString(char* input, char** output, int *length)
                 {
                     if (fslash)
                     {
-                        word[arrcharcnt]=input[charcnt];
+                        word[arrcharcnt]=source[charcnt];
                         arrcharcnt++;
                         charcnt++;
                         fslash=0;
@@ -211,7 +211,7 @@ void splitArrayFromString(char* input, char** output, int *length)
                 {
                     if ((fslash) || (fquote))
                     {
-                        word[arrcharcnt]=input[charcnt];
+                        word[arrcharcnt]=source[charcnt];
                         arrcharcnt++;
                         charcnt++;
                         if (fslash) fslash=0;
@@ -232,13 +232,13 @@ void splitArrayFromString(char* input, char** output, int *length)
 
                 case '\0':
                 {
-                    debug("I am writing last arguement which is number %d", arrcnt);
+                    debug("I am writing last arguement which is number %d", arguementCnt);
                     word[arrcharcnt]='\0';
                     debug("Writing >%s<", word);
                     arrcharcnt=0;
-                    output[arrcnt]=word;
-                    printf("Written >%s< in array of args\n", output[arrcnt]);
-                    arrcnt++;
+                    arguements[arguementCnt]=word;
+                    printf("Written >%s< in array of args\n", arguements[arguementCnt]);
+                    arguementCnt++;
                     fend=1;
                     break;
                 }
@@ -247,27 +247,27 @@ void splitArrayFromString(char* input, char** output, int *length)
                 {
                     if (fquote)
                     {
-                        word[arrcharcnt]=input[charcnt];
+                        word[arrcharcnt]=source[charcnt];
                         arrcharcnt++;
                         charcnt++;
                     }
                     else
                     {
                         charcnt++;
-                        debug("I have arguement number %d", arrcnt);
+                        debug("I have arguement number %d", arguementCnt);
                         word[arrcharcnt]='\0';
                         debug("Writing >%s<", word);
                         arrcharcnt=0;
-                        output[arrcnt]=word;
-                        printf("Written >%s< in array of args\n", output[arrcnt]);
-                        arrcnt++;
+                        arguements[arguementCnt]=word;
+                        printf("Written >%s< in array of args\n", arguements[arguementCnt]);
+                        arguementCnt++;
                     }
                     break;
                 }
 
                 default:
                 {
-                    word[arrcharcnt]=input[charcnt];
+                    word[arrcharcnt]=source[charcnt];
                     arrcharcnt++;
                     charcnt++;
                     break;
@@ -279,7 +279,7 @@ void splitArrayFromString(char* input, char** output, int *length)
             errflag=1;
             log_err("The quote was not closed - will not execute the command");
         }
-        *length=arrcnt;
+    arguements[arguementCnt]=NULL;
     }
 
 void printArguements(arg** inputList) /* This is a placeholder since we don't do anything with arguements yet */
@@ -302,5 +302,16 @@ void printArguements(arg** inputList) /* This is a placeholder since we don't do
             }
             
     }
+
+void cleanCommandArray()
+    {
+        while (arguementCnt!=0) 
+        {
+            arguements[arguementCnt]=NULL;
+            arguementCnt--;                                  
+        }                                                    
+    }
+
+
 
 #endif

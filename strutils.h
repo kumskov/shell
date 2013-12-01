@@ -5,6 +5,7 @@
 
 char* getString() /* Read infinite string from the input, say something if we go over MEM_LENGTH. */
     { 
+    cleanCommandArray();
     int a=0, n=1;
     char* input;
     input=(char*) malloc(STRING_INIT_LENGTH*sizeof(char));
@@ -32,7 +33,8 @@ char* getString() /* Read infinite string from the input, say something if we go
     }
     input[a]='\0';
     
-    return input;
+    source=input;
+    splitString();
     }
 
 char* strmerge(char* str1, char* str2)
@@ -104,16 +106,29 @@ void cleanUp(char** array)
     }
 
 void testarray()
-{
-    int i;
-    for (i=0;i<5;i++)
     {
-        debug("test %s", arguements[i]);
+        int i;
+        for (i=0;i<5;i++)
+        {
+            debug("test %s", arguements[i]);
+        }
+        debug("test1 %s", arguements[0]);
+        debug("test1 %s", arguements[1]);
+        debug("test1 %s", arguements[2]);
     }
-    debug("test1 %s", arguements[0]);
-    debug("test1 %s", arguements[1]);
-    debug("test1 %s", arguements[2]);
-}
 
+void sayHello(whom toMyLittleFriend)
+    {
+        printf("\n-----------------------------------------------------------\n");
+        printf("\tShell started, process ID is <%s>\n", SHELL_ID);
+        printf("\tNot much is implemented yet, type \"help\" to see what's up\n");
+        printf("-------------------------------------------------------------\n");
+        printf("\n");
+    }
+
+void inviteUser()
+    {
+        printf("%s@shell:~%s$", getenv("LOGNAME"), getcwd(currentDirectory, 1024));
+    }
 
 #endif
