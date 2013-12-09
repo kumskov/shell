@@ -3,7 +3,7 @@
 
 /* Main procedure to launch new process. Because newProcess() is too mainstream. */
 
-void ironsInTheFire(char *cmd[], char* file, int mode, int descriptor)   
+void ironsInTheFire(char *cmd[], char* file, int mode, struct _IO_FILE *descriptor)   
     {
         pid_t pid;
         pid=fork();
@@ -13,8 +13,8 @@ void ironsInTheFire(char *cmd[], char* file, int mode, int descriptor)
             setpgid(pid, pid);                                                                      
             procList=addNewProcess(pid, *(cmd), file, (int) mode); 
             process* proc=getProcessByPID(pid);                            
-            if (executionMode == FG) sendProcessToForeground(proc);                                       
-            if (executionMode == BG) sendProcessToBackground(proc);   
+            if (mode == FG) sendProcessToForeground(proc);                                       
+            if (mode == BG) sendProcessToBackground(proc);   
         } 
         else
         {
@@ -40,7 +40,7 @@ void waitForProcess(process* proc)
         procList=deleteProcess(proc);                                   
     }
 
-void execute(char *cmd[], char *file, int mode, int descrtiptor)
+void execute(char *cmd[], char *file, int mode, struct _IO_FILE *descriptor)
     {
         int commandDesc;
         if (descriptor==STDIN) 
@@ -56,7 +56,7 @@ void execute(char *cmd[], char *file, int mode, int descrtiptor)
             dup2(commandDesc, STDOUT_FILENO);
             close(commandDesc);
         }
-        if (execvp(*cmd, cmd)==-1) log_err("Could not execute <%s>", *cmd);
+        if (execvp(cmd[0], cmd)==-1) log_err("\nCould not execute <%s>", *cmd);
     }
 
 /* Pre-defined commands */
@@ -66,7 +66,7 @@ void helpMe()   /* Print help */
     int j;
     for (j=0;j<commandAmount;j++)
         {
-        printf("<%s>: %s\n", defaultCommands[j], commandHelp[j]);
+        printf("[%s]: %s\n", defaultCommands[j], commandHelp[j]);
         }
     }
 
@@ -85,13 +85,17 @@ void killMe()   /* Terminate shell execution */
 
 void changeDir()    /* Change directory */
     {
+        /* if (arguements[1]=="..")
+        {
+            dotflag=1;
+        } */
         if (arguements[1] == NULL) 
         {
             chdir(getenv("HOME"));                                                 
         } 
         else 
         {
-            if (chdir(commandArgv[1])==-1) printf(" %s: Dir doesnt exits\n", arguements[1]);
+            if (chdir(arguements[1])==-1) printf(" %s: Dir doesnt exits\n", arguements[1]);
         }
     }
 
@@ -101,6 +105,7 @@ int checkDefaultCommands()  /* Check for pre-defined command usage. Almost done 
     for (i=0;i<commandAmount;i++)
         {
         chk=strcmp(arguements[0], defaultCommands[i]);
+        /* printf("%s - %s: %d\n", arguements[0], defaultCommands[i], chk); */
         if (!chk) 
             {
             switch(i)
@@ -137,7 +142,7 @@ int checkDefaultCommands()  /* Check for pre-defined command usage. Almost done 
                     }
                 case 5:
                     {
-                    printf("Work in progress. Sorry, mate.\n")
+                    printf("Work in progress. Sorry, mate.\n");
                     f=1;
                     break;
                     }
@@ -155,7 +160,7 @@ int checkDefaultCommands()  /* Check for pre-defined command usage. Almost done 
                     }   
                 case 8:
                     {
-                    printf("Work in progress. Sorry, mate.\n")
+                    printf("Work in progress. Sorry, mate.\n");
                     f=1;
                     break;
                     }   
@@ -174,7 +179,9 @@ int checkDefaultCommands()  /* Check for pre-defined command usage. Almost done 
 
 void startWorking()         /* Yup. The creation of a procedure for 1 line of code was totally nessesary */
     {
-        if(!checkDefaultCommands) ironsInTheFire(arguements, "standart_output", FG, 0)
+        if(!checkDefaultCommands()) {} ironsInTheFire(arguements, "standart_output", FG, 0);
+        sleep(1);
+
     }
 
 #endif
