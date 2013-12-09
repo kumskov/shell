@@ -1,6 +1,8 @@
 #ifndef __utils_h__
 #define __utils_h__
 
+#include "headers.h"
+
 /* Old junk to work with lists. No longer needed since I don't use lists anymore. */
 
 void pushToList(arg** target, char* text) /* Will push "text" string to "trg"-list */
@@ -114,7 +116,7 @@ void sendProcessToForeground(process* proc)
     {
         proc->status=FG;                                                
         tcsetpgrp(TERMINAL, proc->pid);                                 
-        waitFroProcess(proc);                                                                              
+        waitForProcess(proc);                                                                              
         tcsetpgrp(TERMINAL, SHELL_PG);                              
     }
 
@@ -142,7 +144,7 @@ process* addNewProcess (pid_t pid, char* name, char* descriptor, int status)
             if (procList==NULL) 
             {
                 processCounter++;
-                newProc->cnt=numActiveJobs;
+                newProc->cnt=processCounter;
                 return newProc;
             } 
             else 
@@ -172,10 +174,10 @@ int changeProcessStatus(pid_t pid, int status)
 
 process* deleteProcess(process* proc)
     {
-        if (jobsList == NULL) return NULL;
+        if (procList==NULL) return NULL;
 
         process* currentProcess;
-        process* beforeCurrentProcess;
+        process* beforeProcess;
 
         currentProcess=procList->next;
         beforeProcess=procList;
