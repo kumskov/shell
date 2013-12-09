@@ -4,6 +4,7 @@
 #include "utils.h"
 #include "parser.h"
 #include "executor.h"
+/* #include "shared.h" */
 
 
 
@@ -11,10 +12,12 @@ int main()
     {
         init();
         sayHello();
-        while ((TRUE) && (!endflag))
+        while (TRUE)
             {
+                cleanCommandArray();
                 inviteUser();
                 getString();
+                /* printf("%s\n", arguements[0]); */
                 startWorking();
             }    
         
