@@ -10,6 +10,8 @@
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <fcntl.h>
+#include <termios.h>
 
 #define TRUE 1
 #define FALSE 0		/* Why didn't I define this earlier? */
@@ -21,6 +23,11 @@
 #define MEM_LENGHT 1<<16 		/* What I assume is our memory length is. Everything over it will give you an error, nothing will be executed */
 #define STRING_INIT_LENGTH 100
 #define MAX_PROCESS_AMOUNT 10	/* Alright, this is where stuff gets real. This one will allow multiple processes running at a time */
+
+
+#define WAIT_ANY -1
+#define STDIN stdin 
+#define STDOUT stdout 
 
 /* Consts and stuff */
 
@@ -34,6 +41,7 @@ typedef struct node /* 2-way list for keeping our arguements */
 
 typedef struct proc 
     {
+    int id;
     int cnt;
     char *name;
     pid_t pid;
@@ -42,14 +50,11 @@ typedef struct proc
     int status;	/* This way I will be able to move it to foreground or background */
     } process;
 
-
+#define FG 1        /* Foreground */
+#define BG 2        /* Background */
 
 static process* procList = NULL;    /* No processes ATM, nothing to see here. */
 static int processCounter;
-
-#define FG 1 		/* Foreground */
-#define BG 2 		/* Background */
-#define whom void
 
 static char* source;
 static char execName[MAX_ARR_SIZE];
@@ -61,25 +66,26 @@ static int arguementCnt=0;
 
 static char* defaultCommands[] = {"exit", "pwd", "help", "---", "cd", "kill", ">", "<", "<<"};
 static char* commandHelp[] = {"Stops shell execution", "Shows current directory", "Display help", "---", "Change directory", "Kill a process", "Direct process input", "Direct process output", "Append process output to the file"};
-static const int commandAmount = 5;
+static const int commandAmount = 9;
 static int argflag;
 static int arglenght;
 static int defflag;
 static int errflag;
 static int endflag=0;
+static int dotflag=1;
 
 static struct termios TERMINAL_MODE;
-int TERMINAL;	/* Input-output control */
-pid_t SHELL_ID;	/* Shell pid to return terminal control	*/
-pid_t SHELL_PG;
+static int TERMINAL;	/* Input-output control */
+static pid_t SHELL_ID;	/* Shell pid to return terminal control	*/
+static pid_t SHELL_PG;
 
 /* Command execution and other junk */
 
-void ironsInTheFire(char *cmd[], char* file, int mode, int descriptor);  
+void ironsInTheFire(char *cmd[], char* file, int mode, struct _IO_FILE *descriptor);  
 
 void waitForProcess(process* proc);
 
-void execute(char *cmd[], char *file, int mode, int descrtiptor);
+void execute(char *cmd[], char *file, int mode, struct _IO_FILE *descrtiptor);
 
 /* Pre-defined commands */
 
@@ -163,7 +169,7 @@ void cleanUp(char** array);
 
 void testarray();
 
-void sayHello(whom toMyLittleFriend);
+void sayHello();
 
 void inviteUser();
 
