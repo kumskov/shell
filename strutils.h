@@ -1,6 +1,8 @@
 #ifndef __strutils_h__ 
 #define __strutils_h__
 
+#include "headers.h"
+
 /* Reading user input */
 
 char* getString() /* Read infinite string from the input, say something if we go over MEM_LENGTH. */
@@ -9,7 +11,6 @@ char* getString() /* Read infinite string from the input, say something if we go
     int a=0, n=1;
     char* input;
     input=(char*) malloc(STRING_INIT_LENGTH*sizeof(char));
-
     input[a]=getchar();
     
     while ((input[a]!='\n') && (input[a]!='\0') && (input[a]!=EOF))
@@ -27,14 +28,15 @@ char* getString() /* Read infinite string from the input, say something if we go
         }
     if (input[a]==EOF) 
     {
-        printf("\nTerminating...\n");
+        printf("\nTerminating from getstring...\n");
         free(input);
         exit(0);
-    }
+    } 
     input[a]='\0';
     
     source=input;
     splitString();
+    free(source);
     }
 
 char* strmerge(char* str1, char* str2)
@@ -117,10 +119,10 @@ void testarray()
         debug("test1 %s", arguements[2]);
     }
 
-void sayHello(whom toMyLittleFriend)
+void sayHello()
     {
         printf("\n-----------------------------------------------------------\n");
-        printf("\tShell started, process ID is <%s>\n", SHELL_ID);
+        printf("\tShell started, process ID is <%d>\n", SHELL_ID);
         printf("\tNot much is implemented yet, type \"help\" to see what's up\n");
         printf("-------------------------------------------------------------\n");
         printf("\n");
@@ -128,7 +130,29 @@ void sayHello(whom toMyLittleFriend)
 
 void inviteUser()
     {
-        printf("%s@shell:~%s$", getenv("LOGNAME"), getcwd(currentDirectory, 1024));
+        if (dotflag)
+        {
+            printf("%s@shell:~%s$ ", getenv("LOGNAME"), getcwd(currentDir, 1024));
+
+        }
+        else
+        {
+            printf("%s@shell:$ ", getenv("LOGNAME"));
+
+        }
     }
+
+void append(char* subject, const char* insert, int pos) 
+{
+    char buf[100]={};
+
+    strncpy(buf, subject, pos); 
+    int len=strlen(buf);
+    strcpy(buf+len, insert); 
+    len+=strlen(insert);  
+    strcpy(buf+len, subject+pos+1); 
+
+    strcpy(subject, buf); 
+}
 
 #endif
