@@ -159,6 +159,7 @@ void splitString()
         int fslash=0, fquote=0, fend=0;
         int charcnt=0, arrcharcnt=0;
         char word[STRING_INIT_LENGTH];
+        char * pch;
 
         while (!fend)
         {
@@ -168,7 +169,7 @@ void splitString()
                 {
                     if (fslash)
                     {
-                        word[arrcharcnt]=source[charcnt];
+                        /* word[arrcharcnt]=source[charcnt]; */
                         arrcharcnt++;
                         charcnt++;
                         fslash=0;
@@ -185,7 +186,7 @@ void splitString()
                 {
                     if (fslash)
                     {
-                        word[arrcharcnt]=source[charcnt];
+                        /* word[arrcharcnt]=source[charcnt]; */
                         arrcharcnt++;
                         charcnt++;
                         fslash=0;
@@ -211,7 +212,7 @@ void splitString()
                 {
                     if ((fslash) || (fquote))
                     {
-                        word[arrcharcnt]=source[charcnt];
+                        /* word[arrcharcnt]=source[charcnt]; */
                         arrcharcnt++;
                         charcnt++;
                         if (fslash) fslash=0;
@@ -232,13 +233,16 @@ void splitString()
 
                 case '\0':
                 {
-                    debug("I am writing last arguement which is number %d", arguementCnt);
+                    /* debug("I am writing last arguement which is number %d", arguementCnt);
                     word[arrcharcnt]='\0';
                     debug("Writing >%s<", word);
                     arrcharcnt=0;
                     arguements[arguementCnt]=word;
                     printf("Written >%s< in array of args\n", arguements[arguementCnt]);
-                    arguementCnt++;
+                    arguementCnt++; */
+
+                    debug("I have reached the end.");
+
                     fend=1;
                     break;
                 }
@@ -247,27 +251,32 @@ void splitString()
                 {
                     if (fquote)
                     {
-                        word[arrcharcnt]=source[charcnt];
+                        /* word[arrcharcnt]=source[charcnt]; */
                         arrcharcnt++;
                         charcnt++;
                     }
                     else
                     {
-                        charcnt++;
+                        /* charcnt++;
                         debug("I have arguement number %d", arguementCnt);
                         word[arrcharcnt]='\0';
                         debug("Writing >%s<", word);
                         arrcharcnt=0;
                         arguements[arguementCnt]=word;
                         printf("Written >%s< in array of args\n", arguements[arguementCnt]);
-                        arguementCnt++;
+                        arguementCnt++; */
+
+                        append(source, "║", charcnt);
+                        charcnt+=4;
+                        debug("Source is now <%s>, charnt is <%d>", source, charcnt);
+
                     }
                     break;
                 }
 
                 default:
                 {
-                    word[arrcharcnt]=source[charcnt];
+                    /* word[arrcharcnt]=source[charcnt]; */
                     arrcharcnt++;
                     charcnt++;
                     break;
@@ -279,8 +288,21 @@ void splitString()
             errflag=1;
             log_err("The quote was not closed - will not execute the command");
         }
+
+    
+    arguementCnt=0;
+    pch=strtok(source, "║");
+    debug("pch is <%s>", pch);
+    while (pch!=NULL)
+    {
+        arguements[arguementCnt]=pch;
+        debug("Written <%s>", arguements[arguementCnt]);
+        arguementCnt++;
+        pch=strtok(NULL, "║");
+    } 
+    arguementCnt++;
     arguements[arguementCnt]=NULL;
-    }
+}
 
 void printArguements(arg** inputList) /* This is a placeholder since we don't do anything with arguements yet */
     {   
