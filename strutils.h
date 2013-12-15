@@ -5,12 +5,69 @@
 
 /* Reading user input */
 
-char* getString() /* Read infinite string from the input, say something if we go over MEM_LENGTH. */
+char* getString(int *Break1) /* Read infinite string from the input, say something if we go over MEM_LENGTH. */
     { 
-    cleanCommandArray();
+    int c;
+    int length = 1,n = 1,half_memory = 0; 
+    char* str;
+
+    str = (char*)calloc(1,sizeof(char));
+
+    printf("\n>  ");
+    while ((c = getchar()) != '\n') 
+        {
+        if (length+1 > n) 
+        {
+            if (half_memory) n++;
+            else n = 2 * n;
+            str = realloc(str, n * sizeof(char));
+            if ((str == NULL) && (half_memory == 0))
+                {
+                printf("\nWarning! You've taken half of memory. Finish entering the string. \n");
+                half_memory = 1;
+                }
+            if ((str == NULL) && (half_memory == 1))
+                {printf("\nOut of memory.\n");}
+            }
+        if (c == EOF) break;
+        str[length-1] = (char) c;
+        length++;
+        }
+ 
+    if (half_memory == 1) 
+        {
+        *Break1 = 2; 
+        return NULL;
+        }
+    else if (c == EOF) 
+        {
+        *Break1 = 1;
+        str[length-1] = '\0';
+        printf("\n");
+        return str;
+        }
+    else 
+        {
+        str[length-1] = '\0';
+        return str;
+        }
+    }
+
+char* getOldString(int eoflag) /* Read infinite string from the input, say something if we go over MEM_LENGTH. */
+    { 
     int a=0, n=1;
     char* input;
-    input=(char*) malloc(STRING_INIT_LENGTH*sizeof(char));
+    input=(char*) malloc(sizeof(char));
+    /*
+    tempinp=(char*) malloc(sizeof(char));
+    
+        if (tempinp==NULL)
+            {
+            free(input);
+            } else input=tempinp;
+    */
+
+
     input[a]=getchar();
     
     while ((input[a]!='\n') && (input[a]!='\0') && (input[a]!=EOF))
@@ -23,20 +80,28 @@ char* getString() /* Read infinite string from the input, say something if we go
                     /* I will probably need some error flag in here. */
             break;  /* Yeah, that's right. You exceed MEMORY LENGHT - everything BREAKs. */
             }
+        /*  
+        tempinp=(char*) realloc(input, n*sizeof(char));
+        if (tempinp==NULL) 
+            {
+            free(input);
+            break;
+            } else input=tempinp;
+        */
         a++;
         input[a]=getchar();
+        if  (input[a]==EOF) 
+            {
+            eoflag=1;
+            break;
+            }
+        else eoflag=0;
         }
-    if (input[a]==EOF) 
-    {
-        printf("\nTerminating from getstring...\n");
-        free(input);
-        exit(0);
-    } 
     input[a]='\0';
     
-    source=input;
-    splitString();
-    free(source);
+    /* printf("The input is %s\n",input); */ /* Just some debugging junk */
+    
+    return input;
     }
 
 char* strmerge(char* str1, char* str2)

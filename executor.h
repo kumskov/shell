@@ -99,6 +99,118 @@ void changeDir()    /* Change directory */
         }
     }
 
+int Command_handler(char** split,char* shell)
+    {
+    int i = 0, executed = 0;
+    
+    signal(SIGINT,SIG_IGN);
+
+    while (split[i] != NULL)
+        {
+        if (strcmp(split[i],"$EUID") == 0)  /*$EUID*/      
+            {
+            if (i == 0)
+                {
+                printf("EUID is: %d\n",geteuid());
+                executed = 1;
+                }
+            free(split[i]);
+            split[i] = (char *) malloc(sizeof(char)*10);
+            sprintf(split[i],"%d",geteuid());
+            }   
+
+        else if (strcmp(split[i],"$USER") == 0) /*$USER*/ 
+            {
+            if (i == 0)
+                {
+                printf("Your login is: %s\n",getenv("LOGNAME"));
+                executed = 1;
+                }
+            free(split[i]);
+            split[i] = (char *) calloc(strlen(getenv("LOGNAME"))+1,sizeof(char));
+            strncpy(split[i],getenv("LOGNAME"),strlen(getenv("LOGNAME")));
+            }
+
+        else if (strcmp(split[i],"$HOME") == 0) /*$HOME*/
+            {
+            if (i == 0)
+                {
+                printf("Your home directory is: %s\n",getenv("HOME"));
+                executed = 1;
+                }
+            free(split[i]);
+            split[i] = (char *) calloc(strlen(getenv("HOME"))+1,sizeof(char));
+            strncpy(split[i],getenv("HOME"),strlen(getenv("HOME")));
+            }
+
+        else if (strcmp(split[i],"$SHELL") == 0)    /*$SHELL*/
+            {
+            if (i == 0)
+                {
+                printf("Shell is: %s\n",shell);
+                executed = 1;
+                }
+            free(split[i]);
+            split[i] = (char *) calloc(strlen(shell)+1,sizeof(char));
+            strncpy(split[i],shell,strlen(shell));
+            }
+
+        i++;
+        }
+
+    
+    i = 0;
+    if (executed == 0)
+        {
+
+        if (strcmp(split[i],"cd") == 0) /*cd*/
+            {
+            if (split[i+1] != NULL)
+                {
+                printf("You're going to directory %s\n",split[i+1]);
+                if (chdir(split[i+1]) != 0)
+                    perror("Unreachable parameter of cd");
+                }
+            else
+                {
+                printf("You're going to home directory (%s).\n",getenv("HOME"));
+                chdir(getenv("HOME"));
+                }
+            }
+
+        else if (strcmp(split[i],"pwd") == 0)   /*pwd*/
+            {
+            char* cur_dir = getcwd(NULL,0);
+            printf("Your current directory is: %s\n",cur_dir);
+            free(cur_dir);
+            }
+
+        else if (strcmp(split[i],"exit") == 0)  /*exit*/
+            {
+            printf("I'm going to exit.\n");
+            return 1;
+            }
+
+        else    /*Process*/
+            {
+            if (fork() == 0)    /*Son*/
+                {
+                signal(SIGINT,SIG_DFL);
+                printf("Starting process with PID = %d\n",getpid());
+                execvp(split[i],split);
+                printf("There is no such command.\n");
+                exit(0);
+                }
+            else    /*Parent*/
+                {
+                }
+            }
+        }
+    
+    wait(NULL);
+    return 0;       
+    }
+
 int checkDefaultCommands()  /* Check for pre-defined command usage. Almost done */
     {
     int chk, f=0, i;
