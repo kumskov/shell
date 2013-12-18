@@ -5,15 +5,15 @@
 
 /* Reading user input */
 
-char* getString(int *Break1) /* Read infinite string from the input, say something if we go over MEM_LENGTH. */
+
+char* getString(int *Break1) 
     { 
     int c;
     int length = 1,n = 1,half_memory = 0; 
     char* str;
 
     str = (char*)calloc(1,sizeof(char));
-
-    printf("\n>  ");
+    
     while ((c = getchar()) != '\n') 
         {
         if (length+1 > n) 
@@ -33,7 +33,7 @@ char* getString(int *Break1) /* Read infinite string from the input, say somethi
         str[length-1] = (char) c;
         length++;
         }
- 
+
     if (half_memory == 1) 
         {
         *Break1 = 2; 
@@ -53,6 +53,8 @@ char* getString(int *Break1) /* Read infinite string from the input, say somethi
         }
     }
 
+
+
 char* getOldString(int eoflag) /* Read infinite string from the input, say something if we go over MEM_LENGTH. */
     { 
     int a=0, n=1;
@@ -66,7 +68,7 @@ char* getOldString(int eoflag) /* Read infinite string from the input, say somet
             free(input);
             } else input=tempinp;
     */
-
+    debug("test");
 
     input[a]=getchar();
     
@@ -92,6 +94,7 @@ char* getOldString(int eoflag) /* Read infinite string from the input, say somet
         input[a]=getchar();
         if  (input[a]==EOF) 
             {
+            debug("Caught EOF\n");
             eoflag=1;
             break;
             }
