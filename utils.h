@@ -70,6 +70,7 @@ void init()
         TERMINAL = STDIN_FILENO;     
         SHELL_PG = getpgrp();                                  
 
+
         if (isatty(TERMINAL)) 
         {                    
             while (tcgetpgrp(TERMINAL)!=(SHELL_PG=getpgrp())) kill(SHELL_ID, SIGTTIN);                   
@@ -98,6 +99,117 @@ void init()
             exit(-1);
         }
     }
+
+
+
+int createPipeLine()
+{
+    pipeline=malloc(sizeof(process));
+    pproc *newp=pipeline;
+    pproc *nextp=malloc(sizeof(process));
+    int i=0;
+    int j=0;
+    int done=0;
+    while (arguements[i]=NULL)
+    {
+        if(arguements[i]==">")
+        {
+            newp->flout=arguements[i+1];
+            newp->foutflag=1;
+            i+=2;
+        } else
+        if (arguements[i]==">>")
+        {
+            newp->flout=arguements[i+1];
+            newp->fappflag=1;
+            i+=2;
+        }
+
+        if (arguements[i]=="<")
+        {
+            newp->flin=arguements[i+1];
+            newp->finflag=1;
+            i+=2;
+        }
+        
+        if (arguements[i]=="|")
+        {
+            newp->next=nextp;
+            newp->args[j]=NULL;
+            newp=newp->next;
+            done=1;
+            j=0;
+        } else
+            {
+                newp->args[j]=arguements[i];
+                i++;
+                j++;
+            }
+    }
+    newp->args[j]=NULL;
+
+    return done;
+}
+
+
+void startPiping(pproc* line)
+{
+    int fd[2];
+    pid_t pid;
+    if (line!=NULL)
+    {
+        if (line->foutflag==1) 
+        {
+            line->fout=open(line->flout, O_RDWR|O_CREAT|O_TRUNC, 0666);
+            dup2(line->fout, 1);
+        }
+        if (line->finflag==1) 
+        {
+            line->fin=open(line->flin, O_RDWR|O_CREAT|O_TRUNC, 0666);
+            dup2(line->fin, 0);
+        }
+        if (line->fappflag==1) 
+        {
+            line->fout=open(line->flout, O_RDWR|O_APPEND, 0666);
+            dup2(line->fout, 1);
+        }
+        if (line->next!=NULL)
+        {
+            pipe(fd);
+            pid=fork();
+            if (pid)
+            {
+                if ((line->fappflag==0) && (line->foutflag==0)) dup2(fd[1], 1);
+                execvp(line->args[0], line->args);
+                log_err();
+            }
+            else
+            {
+                dup2(fd[0], 0);
+                startPiping(line->next);
+            }
+        } else
+            {
+                execvp(line->args[0], line->args);
+                log_err();
+            }
+    }
+
+}
+
+void cleanPipe()
+{
+    pproc* temp;
+    while(pipeline!=NULL)
+    {
+        temp=pipeline->next;
+        free(pipeline);
+        pipeline=temp;
+    }
+    free(temp);
+}
+        
+
 
 int checkProcessLimit()     /* Check if we have too many processes running */
     {
