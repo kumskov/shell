@@ -50,11 +50,26 @@ typedef struct proc
     int status;	/* This way I will be able to move it to foreground or background */
     } process;
 
+typedef struct ppipe
+    {
+    char** args;
+    int fout;
+    int fin;
+    int finflag;
+    int foutflag;
+    int fappflag;
+    char* flin;
+    char* flout;
+    struct ppipe *next;
+    } pproc;
+
 #define FG 1        /* Foreground */
 #define BG 2        /* Background */
 
 static process* procList = NULL;    /* No processes ATM, nothing to see here. */
 static int processCounter;
+
+static pproc* pipeline = NULL;
 
 static char* source;
 static char execName[MAX_ARR_SIZE];
@@ -64,6 +79,8 @@ static char* currentDir;
 static char* arguements[MAX_ARG_AMOUNT];
 static int arguementCnt=0;
 
+static char* defaultConsts[] = {"$SHELL", "$HOME", "$USER", "$EUID"};
+static const int constAmount = 4;
 static char* defaultCommands[] = {"exit", "pwd", "help", "---", "cd", "kill", ">", "<", "<<"};
 static char* commandHelp[] = {"Stops shell execution", "Shows current directory", "Display help", "---", "Change directory", "Kill a process", "Direct process input", "Direct process output", "Append process output to the file"};
 static const int commandAmount = 9;
@@ -73,6 +90,7 @@ static int defflag;
 static int errflag;
 static int endflag=0;
 static int dotflag=1;
+static char* shelldir;
 
 static struct termios TERMINAL_MODE;
 static int TERMINAL;	/* Input-output control */
@@ -172,5 +190,7 @@ void testarray();
 void sayHello();
 
 void inviteUser();
+
+int checkArray();
 
 #endif
